@@ -42,9 +42,12 @@ class EmployeeTable extends React.Component {
 			employees: employees,
 			filterText: '',
 			isSortedAsc: false,
+			currentPage: 1,
+			rowsPerPage: 5
 		};
 		this.compareBy.bind(this);
 		this.sortBy.bind(this);
+		this.handleClick = this.handleClick.bind(this);
 	}
 
 	handleUserInput(filterText) {
@@ -74,6 +77,12 @@ class EmployeeTable extends React.Component {
 			isSortedAsc: !this.state.isSortedAsc
 		});
 	}
+	handleClick(event) {
+		this.setState({
+			currentPage: Number(event.target.id)
+		});
+	}
+
 
 	render() {
 		const filterText = this.state.filterText;
@@ -83,6 +92,29 @@ class EmployeeTable extends React.Component {
 				return;
 			}
 			return <EmployeeRow key={rowData.id} {...rowData} />
+		});
+
+		const {currentPage, rowsPerPage} = this.state;
+		const indexOfLastRow = currentPage * rowsPerPage;
+		const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+		const pageRows = rows.slice(indexOfFirstRow, indexOfLastRow);
+
+		const pageNumbers = [];
+
+		for (let i = 1; i <= Math.ceil(rows.length / rowsPerPage); i++) {
+ 			pageNumbers.push(i);
+ 		}
+		
+		const shownPageNumbers = pageNumbers.map(number => {
+			return (
+				<span
+					className="pageNumber"
+					key={number}
+					id={number}
+					onClick={this.handleClick}
+				>{number}
+				</span>
+			);
 		});
 
 		return (
@@ -112,9 +144,12 @@ class EmployeeTable extends React.Component {
 							<td>
 							</td>
 						</tr>
-						{rows}
+						{pageRows}
 					</tbody>
 				</table>
+				<div id="pageNumbers">
+					{shownPageNumbers}
+				</div>
 			</div>
 		);		
 	}
